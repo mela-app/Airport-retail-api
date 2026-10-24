@@ -15,3 +15,13 @@ minimumReleaseAge: 10080
 blockExoticSubdeps: true
 # Refuse updates that downgrade a package's publishing trust (e.g. provenance to none).
 trustPolicy: no-downgrade
+
+# Security fixes published less than 7 days ago, allowed by exact version (remove once they are a week old):
+#   body-parser 2.4.0  GHSA-27r3-jxmh-p828, DoS via trailing bytes after a compressed request body
+#   multer 2.5.0       DoS via a pending asynchronous fileFilter after request teardown
+minimumReleaseAgeExclude:
+  - body-parser@2.4.0
+  - multer@2.5.0
+overrides:
+  body-parser: 2.4.0
+  multer: 2.5.0
