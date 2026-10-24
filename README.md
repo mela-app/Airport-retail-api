@@ -20,7 +20,8 @@ The platform is two repositories (`backend/` and `frontend/`, side by side in `A
 The web app's server forwards `/api` to this API, so the browser sees one origin (no CORS) and QR claim links
 work wherever the page is opened.
 
-**Playground:** _URL to be added after deployment_ · **API docs:** `/api/docs` on any running instance
+**Playground:** https://airportweb.kefta-ticket.com · **API docs:** https://airportweb.kefta-ticket.com/api/docs
+(and `/api/docs` on any running instance)
 
 ## Try it in five minutes
 
