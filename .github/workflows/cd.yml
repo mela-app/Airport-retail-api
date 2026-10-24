@@ -1,0 +1,80 @@
+name: CD
+
+# Builds the API image, pushes it to GHCR, then pulls and restarts the
+# production stack. `docker compose up -d` runs the one-shot `migrate`
+# service first (the backend depends on it), so pending migrations and the
+# super-admin seed are applied on the new image before it serves anything.
+#
+# Secrets (repository or organization): SERVER_HOST, SERVER_USER,
+# SERVER_PASSWORD, DEPLOY_PATH.
+
+on:
+  push:
+    branches:
+      - main   # Trigger Production deploy
+  workflow_dispatch:  # Manual run from Actions tab
+
+jobs:
+  build-and-deploy-production:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set lowercase repository owner
+        run: echo "REPO_OWNER_LOWER=$(echo ${{ github.repository_owner }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+
+      - name: Build and Push Image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: |
+            ghcr.io/${{ env.REPO_OWNER_LOWER }}/mela-backend:latest
+            ghcr.io/${{ env.REPO_OWNER_LOWER }}/mela-backend:${{ github.sha }}
+
+      - name: Deploy to Production
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          password: ${{ secrets.SERVER_PASSWORD }}
+          script_stop: true
+          script: |
+            set -euo pipefail
+            echo "🚀 Deploying to Production..."
+
+            # The server pulls with its own read-only registry login
+            # (docs/deployment.md): no token of this job is left behind there.
+             # Login to GHCR
+            echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+            
+            cd "${{ secrets.DEPLOY_PATH }}"
+            test -f docker-compose.yml || { echo "No docker-compose.yml in $PWD - check DEPLOY_PATH"; exit 1; }
+
+            docker compose down
+            docker compose pull
+
+            # `up -d` stops at the one-shot migrate job when it fails, and
+            # reports only its exit code - the reason is in its own log.
+            if ! docker compose up -d; then
+              echo "--- migrate log ---"
+              docker compose logs --no-color --tail=200 migrate || true
+              echo "--- api log ---"
+              docker compose logs --no-color --tail=100 mela-api || true
+              exit 1
+            fi
