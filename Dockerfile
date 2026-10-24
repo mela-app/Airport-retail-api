@@ -50,7 +50,7 @@ COPY --from=build /app/packages/mockgen/dist ./packages/mockgen/dist
 COPY --from=build /app/apps/api/package.json ./apps/api/
 COPY --from=build /app/apps/api/dist ./apps/api/dist
 COPY --from=build /app/apps/api/migrations ./apps/api/migrations
-RUN mkdir -p /data && chown node:node /data
+RUN mkdir -p /app/data/generated && chown -R node:node /app/data
 USER node
 VOLUME ["/data"]
 EXPOSE 8080
