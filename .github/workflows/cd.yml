@@ -44,8 +44,8 @@ jobs:
           file: ./Dockerfile
           push: true
           tags: |
-            ghcr.io/${{ env.REPO_OWNER_LOWER }}/mela-backend:latest
-            ghcr.io/${{ env.REPO_OWNER_LOWER }}/mela-backend:${{ github.sha }}
+            ghcr.io/${{ env.REPO_OWNER_LOWER }}/airport-api:latest
+            ghcr.io/${{ env.REPO_OWNER_LOWER }}/airport-api:${{ github.sha }}
 
       - name: Deploy to Production
         uses: appleboy/ssh-action@v1.2.0
