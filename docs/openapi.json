@@ -1,0 +1,4911 @@
+{
+  "openapi": "3.1.0",
+  "paths": {
+    "/api/sim": {
+      "get": {
+        "operationId": "SimController_state",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Simulation state: clock, airport, day, adapters in use",
+        "tags": [
+          "Simulation"
+        ]
+      }
+    },
+    "/api/sim/play": {
+      "post": {
+        "operationId": "SimController_play",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Play the simulation clock",
+        "tags": [
+          "Simulation"
+        ]
+      }
+    },
+    "/api/sim/pause": {
+      "post": {
+        "operationId": "SimController_pause",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Pause the simulation clock",
+        "tags": [
+          "Simulation"
+        ]
+      }
+    },
+    "/api/sim/speed": {
+      "post": {
+        "operationId": "SimController_speed",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "speed": {
+                    "type": "number",
+                    "minimum": 0.25,
+                    "maximum": 120
+                  }
+                },
+                "required": [
+                  "speed"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Set the simulation speed (e.g. 1x, 10x, 60x)",
+        "tags": [
+          "Simulation"
+        ]
+      }
+    },
+    "/api/sim/jump": {
+      "post": {
+        "operationId": "SimController_jump",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "to": {
+                        "type": "string",
+                        "format": "date-time"
+                      }
+                    },
+                    "required": [
+                      "to"
+                    ]
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "localTime": {
+                        "type": "string",
+                        "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
+                      }
+                    },
+                    "required": [
+                      "localTime"
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Jump to a time (local `HH:MM` or an ISO instant); jumping back rewinds recorded data",
+        "tags": [
+          "Simulation"
+        ]
+      }
+    },
+    "/api/sim/reset": {
+      "post": {
+        "operationId": "SimController_reset",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Reset to the configured start time and speed",
+        "tags": [
+          "Simulation"
+        ]
+      }
+    },
+    "/api/sim/inject/delay": {
+      "post": {
+        "operationId": "SimController_delay",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "flightId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 40
+                  },
+                  "minutes": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 600
+                  },
+                  "delayCode": {
+                    "default": "93",
+                    "type": "string",
+                    "pattern": "^\\d{2}$"
+                  }
+                },
+                "required": [
+                  "flightId",
+                  "minutes"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Inject an AIDX delay for a flight (goes through the AIDX adapter)",
+        "tags": [
+          "Simulation"
+        ]
+      }
+    },
+    "/api/sim/inject/gate-change": {
+      "post": {
+        "operationId": "SimController_gateChange",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "flightId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 40
+                  },
+                  "gate": {
+                    "type": "string",
+                    "pattern": "^[A-Z0-9]{1,5}$"
+                  }
+                },
+                "required": [
+                  "flightId",
+                  "gate"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Inject an AIDX gate change for a departure",
+        "tags": [
+          "Simulation"
+        ]
+      }
+    },
+    "/api/sim/inject/screen-offline": {
+      "post": {
+        "operationId": "SimController_screenOffline",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "screenId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 40
+                  }
+                },
+                "required": [
+                  "screenId"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Take a screen offline (raises an incident after 5 simulated minutes)",
+        "tags": [
+          "Simulation"
+        ]
+      }
+    },
+    "/api/sim/inject/screen-online": {
+      "post": {
+        "operationId": "SimController_screenOnline",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "screenId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 40
+                  }
+                },
+                "required": [
+                  "screenId"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Bring a screen back online",
+        "tags": [
+          "Simulation"
+        ]
+      }
+    },
+    "/api/health": {
+      "get": {
+        "operationId": "OperationsController_health",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Service health",
+        "tags": [
+          "Operations"
+        ]
+      }
+    },
+    "/api/flights": {
+      "get": {
+        "operationId": "OperationsController_flights",
+        "parameters": [
+          {
+            "name": "direction",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "A",
+                "D"
+              ]
+            }
+          },
+          {
+            "name": "terminal",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "maxLength": 4
+            }
+          },
+          {
+            "name": "airline",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "minLength": 2,
+              "maxLength": 2
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "maxLength": 20
+            }
+          },
+          {
+            "name": "from",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "to",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "q",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "maxLength": 20
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 1000,
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Flights (canonical model) with filters",
+        "tags": [
+          "Operations"
+        ]
+      }
+    },
+    "/api/flights/{id}": {
+      "get": {
+        "operationId": "OperationsController_flight",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "One flight with its event history",
+        "tags": [
+          "Operations"
+        ]
+      }
+    },
+    "/api/flight-events/recent": {
+      "get": {
+        "operationId": "OperationsController_recentEvents",
+        "parameters": [
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200,
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Most recent flight events (newest first)",
+        "tags": [
+          "Operations"
+        ]
+      }
+    },
+    "/api/feeds": {
+      "get": {
+        "operationId": "OperationsController_feeds",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Feed health per adapter (AODB, AIDX, ACRIS, audience)",
+        "tags": [
+          "Operations"
+        ]
+      }
+    },
+    "/api/queues/latest": {
+      "get": {
+        "operationId": "OperationsController_queues",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Latest ACRIS queue measurement per queue",
+        "tags": [
+          "Operations"
+        ]
+      }
+    },
+    "/api/screens/status": {
+      "get": {
+        "operationId": "OperationsController_screens",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Runtime status, heartbeat and latency of every screen",
+        "tags": [
+          "Operations"
+        ]
+      }
+    },
+    "/api/incidents": {
+      "get": {
+        "operationId": "OperationsController_incidents",
+        "parameters": [
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "active",
+                "open",
+                "acknowledged",
+                "resolved"
+              ]
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 200,
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 500
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Incidents and alerts",
+        "tags": [
+          "Operations"
+        ]
+      }
+    },
+    "/api/incidents/{id}": {
+      "patch": {
+        "operationId": "OperationsController_updateIncident",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "open",
+                      "acknowledged",
+                      "resolved"
+                    ]
+                  },
+                  "owner": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 80
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Update an incident's status or owner",
+        "tags": [
+          "Operations"
+        ]
+      }
+    },
+    "/api/screens/{id}/now": {
+      "get": {
+        "operationId": "EngineController_screenNow",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "What a screen plays now and why: decision, crowd profile, candidates, AI checks, claim QR",
+        "tags": [
+          "Decision engine"
+        ]
+      }
+    },
+    "/api/decisions": {
+      "get": {
+        "operationId": "EngineController_decisions",
+        "parameters": [
+          {
+            "name": "screenId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "maxLength": 40
+            }
+          },
+          {
+            "name": "campaignId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "maxLength": 40
+            }
+          },
+          {
+            "name": "mode",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ai_verified",
+                "ai_rejected",
+                "rule_based",
+                "manual_pin",
+                "house"
+              ]
+            }
+          },
+          {
+            "name": "q",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "maxLength": 80
+            }
+          },
+          {
+            "name": "from",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "to",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 100,
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 500
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Search the decision log",
+        "tags": [
+          "Decision engine"
+        ]
+      }
+    },
+    "/api/decision-contexts/{id}": {
+      "get": {
+        "operationId": "EngineController_decisionContext",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "A decision context with its full evidence trail",
+        "tags": [
+          "Decision engine"
+        ]
+      }
+    },
+    "/api/presence/zones": {
+      "get": {
+        "operationId": "EngineController_zones",
+        "parameters": [
+          {
+            "name": "at",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Passenger presence per zone (now, or at a given time for forecasts)",
+        "tags": [
+          "Decision engine"
+        ]
+      }
+    },
+    "/api/presence/forecast": {
+      "get": {
+        "operationId": "EngineController_forecast",
+        "parameters": [
+          {
+            "name": "zoneId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "maxLength": 20
+            }
+          },
+          {
+            "name": "hours",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 2,
+              "type": "number",
+              "minimum": 0.5,
+              "maximum": 12
+            }
+          },
+          {
+            "name": "stepMin",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 15,
+              "type": "integer",
+              "minimum": 5,
+              "maximum": 60
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Footfall forecast for a zone (e.g. the next 2 hours)",
+        "tags": [
+          "Decision engine"
+        ]
+      }
+    },
+    "/api/presence/screens": {
+      "get": {
+        "operationId": "EngineController_screens",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Crowd in front of every screen (heat map)",
+        "tags": [
+          "Decision engine"
+        ]
+      }
+    },
+    "/api/settings/rule-engine": {
+      "get": {
+        "operationId": "EngineController_ruleEngine",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Rule-engine settings",
+        "tags": [
+          "Decision engine"
+        ]
+      },
+      "put": {
+        "operationId": "EngineController_updateRuleEngine",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "audienceWeight": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  },
+                  "performanceWeight": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  },
+                  "explorationPct": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 50
+                  },
+                  "defaultFrequencyCap": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 240
+                  },
+                  "maxConsecutivePlays": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 20
+                  },
+                  "minScoreToPlay": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  },
+                  "competitorSeparation": {
+                    "type": "boolean"
+                  },
+                  "airlinePriorityInBoardingWindow": {
+                    "type": "boolean"
+                  },
+                  "airlinePriorityWindowMin": {
+                    "type": "integer",
+                    "minimum": 5,
+                    "maximum": 180
+                  },
+                  "segmentModelVersion": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 60
+                  }
+                },
+                "required": [
+                  "audienceWeight",
+                  "performanceWeight",
+                  "explorationPct",
+                  "defaultFrequencyCap",
+                  "maxConsecutivePlays",
+                  "minScoreToPlay",
+                  "competitorSeparation",
+                  "airlinePriorityInBoardingWindow",
+                  "airlinePriorityWindowMin",
+                  "segmentModelVersion"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Update rule-engine settings (weights, exploration, caps, floor)",
+        "tags": [
+          "Decision engine"
+        ]
+      }
+    },
+    "/api/model": {
+      "get": {
+        "operationId": "EngineController_model",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Learning model in use: version, performance per campaign, per-segment conversion",
+        "tags": [
+          "Decision engine"
+        ]
+      }
+    },
+    "/api/pins": {
+      "get": {
+        "operationId": "EngineController_pins",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Manual pins (Media Manager overrides)",
+        "tags": [
+          "Decision engine"
+        ]
+      },
+      "post": {
+        "operationId": "EngineController_createPin",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "screenId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 40
+                  },
+                  "campaignId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 40
+                  },
+                  "minutes": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 1440
+                  },
+                  "reason": {
+                    "type": "string",
+                    "minLength": 3,
+                    "maxLength": 200
+                  },
+                  "createdBy": {
+                    "default": "Media Manager",
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  }
+                },
+                "required": [
+                  "screenId",
+                  "campaignId",
+                  "minutes",
+                  "reason"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "summary": "Pin a campaign to a screen for a period, with a reason",
+        "tags": [
+          "Decision engine"
+        ]
+      }
+    },
+    "/api/pins/{id}": {
+      "delete": {
+        "operationId": "EngineController_deletePin",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Remove a pin",
+        "tags": [
+          "Decision engine"
+        ]
+      }
+    },
+    "/api/kpis/network": {
+      "get": {
+        "operationId": "EngineController_network",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Network KPIs: screens online, plays, impressions, revenue, scans, redemptions, latency",
+        "tags": [
+          "Decision engine"
+        ]
+      }
+    },
+    "/api/sim/scenario/worked-example": {
+      "post": {
+        "operationId": "EngineController_workedExample",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "localTime": {
+                    "default": "14:10",
+                    "type": "string",
+                    "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Load the worked example: Gate 42 at 14:10, paused",
+        "tags": [
+          "Decision engine"
+        ]
+      }
+    },
+    "/api/advertisers": {
+      "get": {
+        "operationId": "MasterDataController_advertisers",
+        "parameters": [
+          {
+            "name": "kind",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "retailer",
+                "fnb",
+                "airline",
+                "brand",
+                "service"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Vendors (advertisers): retailers, F&B, airlines, brands, services",
+        "tags": [
+          "Master data"
+        ]
+      },
+      "post": {
+        "operationId": "MasterDataController_createAdvertiser",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "retailer",
+                      "fnb",
+                      "airline",
+                      "brand",
+                      "service"
+                    ]
+                  },
+                  "category": {
+                    "type": "string"
+                  },
+                  "competitorGroup": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "airlineIata": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "minLength": 2,
+                        "maxLength": 2
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "contactName": {
+                    "type": "string"
+                  },
+                  "contactEmail": {
+                    "type": "string"
+                  },
+                  "brandColor": {
+                    "type": "string",
+                    "pattern": "^#[0-9a-fA-F]{6}$"
+                  }
+                },
+                "required": [
+                  "name",
+                  "kind",
+                  "category",
+                  "competitorGroup",
+                  "airlineIata",
+                  "contactName",
+                  "contactEmail",
+                  "brandColor"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "summary": "Onboard a vendor",
+        "tags": [
+          "Master data"
+        ]
+      }
+    },
+    "/api/advertisers/{id}": {
+      "get": {
+        "operationId": "MasterDataController_advertiser",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "One vendor",
+        "tags": [
+          "Master data"
+        ]
+      },
+      "put": {
+        "operationId": "MasterDataController_updateAdvertiser",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "retailer",
+                      "fnb",
+                      "airline",
+                      "brand",
+                      "service"
+                    ]
+                  },
+                  "category": {
+                    "type": "string"
+                  },
+                  "competitorGroup": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "airlineIata": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "minLength": 2,
+                        "maxLength": 2
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "contactName": {
+                    "type": "string"
+                  },
+                  "contactEmail": {
+                    "type": "string"
+                  },
+                  "brandColor": {
+                    "type": "string",
+                    "pattern": "^#[0-9a-fA-F]{6}$"
+                  }
+                },
+                "required": [
+                  "name",
+                  "kind",
+                  "category",
+                  "competitorGroup",
+                  "airlineIata",
+                  "contactName",
+                  "contactEmail",
+                  "brandColor"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Edit a vendor",
+        "tags": [
+          "Master data"
+        ]
+      },
+      "delete": {
+        "operationId": "MasterDataController_deactivateAdvertiser",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Deactivate a vendor (its running campaigns are paused)",
+        "tags": [
+          "Master data"
+        ]
+      }
+    },
+    "/api/airlines": {
+      "get": {
+        "operationId": "MasterDataController_airlines",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Airlines",
+        "tags": [
+          "Master data"
+        ]
+      },
+      "post": {
+        "operationId": "MasterDataController_createAirline",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "iata": {
+                    "type": "string",
+                    "pattern": "^[A-Z0-9]{2}$"
+                  },
+                  "icao": {
+                    "type": "string",
+                    "pattern": "^[A-Z]{3}$"
+                  },
+                  "name": {
+                    "type": "string",
+                    "minLength": 2,
+                    "maxLength": 80
+                  },
+                  "model": {
+                    "type": "string",
+                    "enum": [
+                      "low_cost",
+                      "full_service"
+                    ]
+                  },
+                  "market": {
+                    "type": "string",
+                    "enum": [
+                      "domestic",
+                      "international",
+                      "mixed"
+                    ]
+                  },
+                  "brandColor": {
+                    "type": "string",
+                    "pattern": "^#[0-9a-fA-F]{6}$"
+                  }
+                },
+                "required": [
+                  "iata",
+                  "icao",
+                  "name",
+                  "model",
+                  "market",
+                  "brandColor"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "summary": "Add an airline",
+        "tags": [
+          "Master data"
+        ]
+      }
+    },
+    "/api/airlines/{iata}": {
+      "put": {
+        "operationId": "MasterDataController_updateAirline",
+        "parameters": [
+          {
+            "name": "iata",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "icao": {
+                    "type": "string",
+                    "pattern": "^[A-Z]{3}$"
+                  },
+                  "name": {
+                    "type": "string",
+                    "minLength": 2,
+                    "maxLength": 80
+                  },
+                  "model": {
+                    "type": "string",
+                    "enum": [
+                      "low_cost",
+                      "full_service"
+                    ]
+                  },
+                  "market": {
+                    "type": "string",
+                    "enum": [
+                      "domestic",
+                      "international",
+                      "mixed"
+                    ]
+                  },
+                  "brandColor": {
+                    "type": "string",
+                    "pattern": "^#[0-9a-fA-F]{6}$"
+                  },
+                  "active": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "icao",
+                  "name",
+                  "model",
+                  "market",
+                  "brandColor"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Edit or deactivate an airline",
+        "tags": [
+          "Master data"
+        ]
+      }
+    },
+    "/api/outlets": {
+      "get": {
+        "operationId": "MasterDataController_outlets",
+        "parameters": [
+          {
+            "name": "advertiserId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "maxLength": 40
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Outlets and F&B retailers",
+        "tags": [
+          "Master data"
+        ]
+      },
+      "post": {
+        "operationId": "MasterDataController_createOutlet",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "advertiserId": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "category": {
+                    "type": "string",
+                    "enum": [
+                      "duty_free",
+                      "perfume_cosmetics",
+                      "fashion",
+                      "electronics",
+                      "toys",
+                      "books",
+                      "fnb_coffee",
+                      "fnb_dining",
+                      "fnb_sweets",
+                      "pharmacy",
+                      "lounge",
+                      "services"
+                    ]
+                  },
+                  "zoneId": {
+                    "type": "string"
+                  },
+                  "averageBasket": {
+                    "type": "number",
+                    "minimum": 0
+                  },
+                  "position": {
+                    "type": "object",
+                    "properties": {
+                      "x": {
+                        "type": "number"
+                      },
+                      "y": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "x",
+                      "y"
+                    ]
+                  }
+                },
+                "required": [
+                  "advertiserId",
+                  "name",
+                  "category",
+                  "zoneId",
+                  "averageBasket"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "summary": "Add an outlet",
+        "tags": [
+          "Master data"
+        ]
+      }
+    },
+    "/api/outlets/{id}": {
+      "get": {
+        "operationId": "MasterDataController_outlet",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "One outlet",
+        "tags": [
+          "Master data"
+        ]
+      },
+      "put": {
+        "operationId": "MasterDataController_updateOutlet",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "advertiserId": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "category": {
+                    "type": "string",
+                    "enum": [
+                      "duty_free",
+                      "perfume_cosmetics",
+                      "fashion",
+                      "electronics",
+                      "toys",
+                      "books",
+                      "fnb_coffee",
+                      "fnb_dining",
+                      "fnb_sweets",
+                      "pharmacy",
+                      "lounge",
+                      "services"
+                    ]
+                  },
+                  "zoneId": {
+                    "type": "string"
+                  },
+                  "averageBasket": {
+                    "type": "number",
+                    "minimum": 0
+                  },
+                  "position": {
+                    "type": "object",
+                    "properties": {
+                      "x": {
+                        "type": "number"
+                      },
+                      "y": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "x",
+                      "y"
+                    ]
+                  }
+                },
+                "required": [
+                  "advertiserId",
+                  "name",
+                  "category",
+                  "zoneId",
+                  "averageBasket"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Edit an outlet",
+        "tags": [
+          "Master data"
+        ]
+      },
+      "delete": {
+        "operationId": "MasterDataController_deactivateOutlet",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Deactivate an outlet",
+        "tags": [
+          "Master data"
+        ]
+      }
+    },
+    "/api/locations": {
+      "get": {
+        "operationId": "MasterDataController_locations",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Locations: terminals, zones and gates",
+        "tags": [
+          "Master data"
+        ]
+      }
+    },
+    "/api/terminals/{id}": {
+      "put": {
+        "operationId": "MasterDataController_updateTerminal",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "minLength": 2,
+                    "maxLength": 60
+                  },
+                  "mainMarket": {
+                    "type": "string",
+                    "enum": [
+                      "domestic",
+                      "international",
+                      "mixed"
+                    ]
+                  }
+                },
+                "required": [
+                  "name",
+                  "mainMarket"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Edit a terminal",
+        "tags": [
+          "Master data"
+        ]
+      }
+    },
+    "/api/zones": {
+      "post": {
+        "operationId": "MasterDataController_createZone",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "terminalId": {
+                    "type": "string"
+                  },
+                  "concourseId": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "landside_hall",
+                      "security",
+                      "passport_control",
+                      "airside_plaza",
+                      "pier",
+                      "bus_lounge",
+                      "arrivals_hall"
+                    ]
+                  },
+                  "side": {
+                    "type": "string",
+                    "enum": [
+                      "landside",
+                      "airside"
+                    ]
+                  },
+                  "area": {
+                    "type": "object",
+                    "properties": {
+                      "x": {
+                        "type": "number"
+                      },
+                      "y": {
+                        "type": "number"
+                      },
+                      "width": {
+                        "type": "number",
+                        "exclusiveMinimum": 0
+                      },
+                      "height": {
+                        "type": "number",
+                        "exclusiveMinimum": 0
+                      }
+                    },
+                    "required": [
+                      "x",
+                      "y",
+                      "width",
+                      "height"
+                    ]
+                  }
+                },
+                "required": [
+                  "id",
+                  "terminalId",
+                  "concourseId",
+                  "name",
+                  "kind",
+                  "side",
+                  "area"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "summary": "Add a zone",
+        "tags": [
+          "Master data"
+        ]
+      }
+    },
+    "/api/zones/{id}": {
+      "put": {
+        "operationId": "MasterDataController_updateZone",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "concourseId": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "landside_hall",
+                      "security",
+                      "passport_control",
+                      "airside_plaza",
+                      "pier",
+                      "bus_lounge",
+                      "arrivals_hall"
+                    ]
+                  },
+                  "side": {
+                    "type": "string",
+                    "enum": [
+                      "landside",
+                      "airside"
+                    ]
+                  },
+                  "area": {
+                    "type": "object",
+                    "properties": {
+                      "x": {
+                        "type": "number"
+                      },
+                      "y": {
+                        "type": "number"
+                      },
+                      "width": {
+                        "type": "number",
+                        "exclusiveMinimum": 0
+                      },
+                      "height": {
+                        "type": "number",
+                        "exclusiveMinimum": 0
+                      }
+                    },
+                    "required": [
+                      "x",
+                      "y",
+                      "width",
+                      "height"
+                    ]
+                  }
+                },
+                "required": [
+                  "concourseId",
+                  "name",
+                  "kind",
+                  "side",
+                  "area"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Edit a zone",
+        "tags": [
+          "Master data"
+        ]
+      }
+    },
+    "/api/gates": {
+      "post": {
+        "operationId": "MasterDataController_createGate",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "zoneId": {
+                    "type": "string"
+                  },
+                  "remote": {
+                    "type": "boolean"
+                  },
+                  "position": {
+                    "type": "object",
+                    "properties": {
+                      "x": {
+                        "type": "number"
+                      },
+                      "y": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "x",
+                      "y"
+                    ]
+                  },
+                  "terminalId": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "active": {
+                    "default": true,
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "code",
+                  "zoneId",
+                  "remote",
+                  "position",
+                  "terminalId"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "summary": "Add a gate",
+        "tags": [
+          "Master data"
+        ]
+      }
+    },
+    "/api/gates/{id}": {
+      "put": {
+        "operationId": "MasterDataController_updateGate",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "zoneId": {
+                    "type": "string"
+                  },
+                  "remote": {
+                    "type": "boolean"
+                  },
+                  "position": {
+                    "type": "object",
+                    "properties": {
+                      "x": {
+                        "type": "number"
+                      },
+                      "y": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "x",
+                      "y"
+                    ]
+                  },
+                  "active": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "zoneId",
+                  "remote",
+                  "position",
+                  "active"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Edit a gate or take it out of service",
+        "tags": [
+          "Master data"
+        ]
+      }
+    },
+    "/api/screens": {
+      "get": {
+        "operationId": "MasterDataController_screens",
+        "parameters": [
+          {
+            "name": "zoneId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "maxLength": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Screens",
+        "tags": [
+          "Master data"
+        ]
+      },
+      "post": {
+        "operationId": "MasterDataController_createScreen",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "zoneId": {
+                    "type": "string"
+                  },
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "gate_display",
+                      "totem",
+                      "video_wall",
+                      "fids_ad_panel"
+                    ]
+                  },
+                  "orientation": {
+                    "type": "string",
+                    "enum": [
+                      "landscape",
+                      "portrait"
+                    ]
+                  },
+                  "sizeInches": {
+                    "type": "integer",
+                    "exclusiveMinimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "resolution": {
+                    "type": "string"
+                  },
+                  "basePricePerSlot": {
+                    "type": "number",
+                    "minimum": 0
+                  },
+                  "position": {
+                    "type": "object",
+                    "properties": {
+                      "x": {
+                        "type": "number"
+                      },
+                      "y": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "x",
+                      "y"
+                    ]
+                  },
+                  "nearestGateIds": {
+                    "maxItems": 12,
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "required": [
+                  "name",
+                  "zoneId",
+                  "kind",
+                  "orientation",
+                  "sizeInches",
+                  "resolution",
+                  "basePricePerSlot"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "summary": "Install a screen (nearest gates computed when omitted)",
+        "tags": [
+          "Master data"
+        ]
+      }
+    },
+    "/api/screens/{id}": {
+      "get": {
+        "operationId": "MasterDataController_screen",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "One screen",
+        "tags": [
+          "Master data"
+        ]
+      },
+      "put": {
+        "operationId": "MasterDataController_updateScreen",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "zoneId": {
+                    "type": "string"
+                  },
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "gate_display",
+                      "totem",
+                      "video_wall",
+                      "fids_ad_panel"
+                    ]
+                  },
+                  "orientation": {
+                    "type": "string",
+                    "enum": [
+                      "landscape",
+                      "portrait"
+                    ]
+                  },
+                  "sizeInches": {
+                    "type": "integer",
+                    "exclusiveMinimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "resolution": {
+                    "type": "string"
+                  },
+                  "basePricePerSlot": {
+                    "type": "number",
+                    "minimum": 0
+                  },
+                  "position": {
+                    "type": "object",
+                    "properties": {
+                      "x": {
+                        "type": "number"
+                      },
+                      "y": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "x",
+                      "y"
+                    ]
+                  },
+                  "nearestGateIds": {
+                    "maxItems": 12,
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "required": [
+                  "name",
+                  "zoneId",
+                  "kind",
+                  "orientation",
+                  "sizeInches",
+                  "resolution",
+                  "basePricePerSlot"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Edit a screen",
+        "tags": [
+          "Master data"
+        ]
+      }
+    },
+    "/api/creatives": {
+      "get": {
+        "operationId": "MasterDataController_creatives",
+        "parameters": [
+          {
+            "name": "advertiserId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "maxLength": 40
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "maxLength": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Creative library",
+        "tags": [
+          "Master data"
+        ]
+      },
+      "post": {
+        "operationId": "MasterDataController_createCreative",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "advertiserId": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "template": {
+                    "type": "string",
+                    "enum": [
+                      "offer_split",
+                      "hero_full",
+                      "gate_message",
+                      "voucher",
+                      "destination"
+                    ]
+                  },
+                  "artwork": {
+                    "type": "string"
+                  },
+                  "palette": {
+                    "type": "object",
+                    "properties": {
+                      "background": {
+                        "type": "string"
+                      },
+                      "foreground": {
+                        "type": "string"
+                      },
+                      "accent": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "background",
+                      "foreground",
+                      "accent"
+                    ]
+                  },
+                  "content": {
+                    "type": "object",
+                    "propertyNames": {
+                      "type": "string"
+                    },
+                    "additionalProperties": {
+                      "type": "object",
+                      "properties": {
+                        "headline": {
+                          "type": "string",
+                          "maxLength": 80
+                        },
+                        "body": {
+                          "type": "string",
+                          "maxLength": 240
+                        },
+                        "cta": {
+                          "type": "string",
+                          "maxLength": 40
+                        },
+                        "badge": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                              "maxLength": 24
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "headline",
+                        "body",
+                        "cta",
+                        "badge"
+                      ]
+                    }
+                  },
+                  "formats": {
+                    "minItems": 1,
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "enum": [
+                        "16:9",
+                        "9:16"
+                      ]
+                    }
+                  },
+                  "brandSafety": {
+                    "type": "object",
+                    "properties": {
+                      "noRealBrandMarks": {
+                        "type": "boolean"
+                      },
+                      "claimsVerified": {
+                        "type": "boolean"
+                      },
+                      "ageAppropriate": {
+                        "type": "boolean"
+                      },
+                      "legibleAtDistance": {
+                        "type": "boolean"
+                      }
+                    },
+                    "required": [
+                      "noRealBrandMarks",
+                      "claimsVerified",
+                      "ageAppropriate",
+                      "legibleAtDistance"
+                    ]
+                  },
+                  "status": {
+                    "default": "pending_review",
+                    "type": "string",
+                    "enum": [
+                      "draft",
+                      "pending_review"
+                    ]
+                  }
+                },
+                "required": [
+                  "advertiserId",
+                  "name",
+                  "template",
+                  "artwork",
+                  "palette",
+                  "content",
+                  "formats",
+                  "brandSafety"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "summary": "Create a creative",
+        "tags": [
+          "Master data"
+        ]
+      }
+    },
+    "/api/creatives/{id}": {
+      "get": {
+        "operationId": "MasterDataController_creative",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "One creative",
+        "tags": [
+          "Master data"
+        ]
+      },
+      "put": {
+        "operationId": "MasterDataController_updateCreative",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "advertiserId": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "template": {
+                    "type": "string",
+                    "enum": [
+                      "offer_split",
+                      "hero_full",
+                      "gate_message",
+                      "voucher",
+                      "destination"
+                    ]
+                  },
+                  "artwork": {
+                    "type": "string"
+                  },
+                  "palette": {
+                    "type": "object",
+                    "properties": {
+                      "background": {
+                        "type": "string"
+                      },
+                      "foreground": {
+                        "type": "string"
+                      },
+                      "accent": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "background",
+                      "foreground",
+                      "accent"
+                    ]
+                  },
+                  "content": {
+                    "type": "object",
+                    "propertyNames": {
+                      "type": "string"
+                    },
+                    "additionalProperties": {
+                      "type": "object",
+                      "properties": {
+                        "headline": {
+                          "type": "string",
+                          "maxLength": 80
+                        },
+                        "body": {
+                          "type": "string",
+                          "maxLength": 240
+                        },
+                        "cta": {
+                          "type": "string",
+                          "maxLength": 40
+                        },
+                        "badge": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                              "maxLength": 24
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "headline",
+                        "body",
+                        "cta",
+                        "badge"
+                      ]
+                    }
+                  },
+                  "formats": {
+                    "minItems": 1,
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "enum": [
+                        "16:9",
+                        "9:16"
+                      ]
+                    }
+                  },
+                  "brandSafety": {
+                    "type": "object",
+                    "properties": {
+                      "noRealBrandMarks": {
+                        "type": "boolean"
+                      },
+                      "claimsVerified": {
+                        "type": "boolean"
+                      },
+                      "ageAppropriate": {
+                        "type": "boolean"
+                      },
+                      "legibleAtDistance": {
+                        "type": "boolean"
+                      }
+                    },
+                    "required": [
+                      "noRealBrandMarks",
+                      "claimsVerified",
+                      "ageAppropriate",
+                      "legibleAtDistance"
+                    ]
+                  },
+                  "status": {
+                    "default": "pending_review",
+                    "type": "string",
+                    "enum": [
+                      "draft",
+                      "pending_review"
+                    ]
+                  }
+                },
+                "required": [
+                  "advertiserId",
+                  "name",
+                  "template",
+                  "artwork",
+                  "palette",
+                  "content",
+                  "formats",
+                  "brandSafety"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Edit a creative (sends it back for review)",
+        "tags": [
+          "Master data"
+        ]
+      }
+    },
+    "/api/creatives/{id}/duplicate": {
+      "post": {
+        "operationId": "MasterDataController_duplicateCreative",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "summary": "Duplicate a creative",
+        "tags": [
+          "Master data"
+        ]
+      }
+    },
+    "/api/creatives/{id}/review": {
+      "post": {
+        "operationId": "MasterDataController_reviewCreative",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "decision": {
+                    "type": "string",
+                    "enum": [
+                      "approve",
+                      "reject"
+                    ]
+                  },
+                  "reason": {
+                    "type": "string",
+                    "maxLength": 300
+                  },
+                  "brandSafety": {
+                    "type": "object",
+                    "properties": {
+                      "noRealBrandMarks": {
+                        "type": "boolean"
+                      },
+                      "claimsVerified": {
+                        "type": "boolean"
+                      },
+                      "ageAppropriate": {
+                        "type": "boolean"
+                      },
+                      "legibleAtDistance": {
+                        "type": "boolean"
+                      }
+                    },
+                    "required": [
+                      "noRealBrandMarks",
+                      "claimsVerified",
+                      "ageAppropriate",
+                      "legibleAtDistance"
+                    ]
+                  }
+                },
+                "required": [
+                  "decision"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Approve or reject a creative (brand-safety checklist)",
+        "tags": [
+          "Master data"
+        ]
+      }
+    },
+    "/api/campaigns": {
+      "get": {
+        "operationId": "MasterDataController_campaigns",
+        "parameters": [
+          {
+            "name": "advertiserId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "maxLength": 40
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "maxLength": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Campaigns",
+        "tags": [
+          "Master data"
+        ]
+      },
+      "post": {
+        "operationId": "MasterDataController_createCampaign",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "advertiserId": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "objective": {
+                    "type": "string",
+                    "enum": [
+                      "awareness",
+                      "footfall",
+                      "conversion",
+                      "goodwill"
+                    ]
+                  },
+                  "creativeIds": {
+                    "minItems": 1,
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "segmentWeights": {
+                    "type": "object",
+                    "propertyNames": {
+                      "type": "string"
+                    },
+                    "additionalProperties": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1
+                    }
+                  },
+                  "hardFilters": {
+                    "type": "object",
+                    "properties": {
+                      "market": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "enum": [
+                              "domestic",
+                              "international"
+                            ]
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "destinationRegions": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "destinations": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "minLength": 3,
+                          "maxLength": 3
+                        }
+                      },
+                      "minDwellMinutes": {
+                        "anyOf": [
+                          {
+                            "type": "number",
+                            "minimum": 0
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "minCrowd": {
+                        "anyOf": [
+                          {
+                            "type": "number",
+                            "minimum": 0
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "market",
+                      "destinationRegions",
+                      "destinations",
+                      "minDwellMinutes",
+                      "minCrowd"
+                    ]
+                  },
+                  "placement": {
+                    "type": "object",
+                    "properties": {
+                      "zoneIds": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "screenIds": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "gateIds": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "schedule": {
+                        "type": "object",
+                        "properties": {
+                          "start": {
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          "end": {
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          "daysOfWeek": {
+                            "type": "array",
+                            "items": {
+                              "type": "integer",
+                              "minimum": 1,
+                              "maximum": 7
+                            }
+                          },
+                          "hours": {
+                            "anyOf": [
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "from": {
+                                    "type": "integer",
+                                    "minimum": 0,
+                                    "maximum": 23
+                                  },
+                                  "to": {
+                                    "type": "integer",
+                                    "minimum": 1,
+                                    "maximum": 24
+                                  }
+                                },
+                                "required": [
+                                  "from",
+                                  "to"
+                                ]
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          }
+                        },
+                        "required": [
+                          "start",
+                          "end",
+                          "daysOfWeek",
+                          "hours"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "zoneIds",
+                      "screenIds",
+                      "gateIds",
+                      "schedule"
+                    ]
+                  },
+                  "budget": {
+                    "type": "object",
+                    "properties": {
+                      "total": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "dailyCap": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "cpm": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "frequencyCapPerScreenHour": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 9007199254740991
+                      }
+                    },
+                    "required": [
+                      "total",
+                      "dailyCap",
+                      "cpm",
+                      "frequencyCapPerScreenHour"
+                    ]
+                  },
+                  "triggers": {
+                    "type": "array",
+                    "items": {
+                      "oneOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "const": "delay_over"
+                            },
+                            "minutes": {
+                              "type": "integer",
+                              "minimum": 1,
+                              "maximum": 9007199254740991
+                            },
+                            "airlineIata": {
+                              "anyOf": [
+                                {
+                                  "type": "string",
+                                  "minLength": 2,
+                                  "maxLength": 2
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "destinations": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "minLength": 3,
+                                "maxLength": 3
+                              }
+                            },
+                            "boost": {
+                              "type": "number",
+                              "minimum": 1,
+                              "maximum": 3
+                            }
+                          },
+                          "required": [
+                            "type",
+                            "minutes",
+                            "airlineIata",
+                            "destinations",
+                            "boost"
+                          ]
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "const": "gate_change"
+                            },
+                            "boost": {
+                              "type": "number",
+                              "minimum": 1,
+                              "maximum": 3
+                            }
+                          },
+                          "required": [
+                            "type",
+                            "boost"
+                          ]
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "const": "boarding_starts"
+                            },
+                            "boost": {
+                              "type": "number",
+                              "minimum": 1,
+                              "maximum": 3
+                            }
+                          },
+                          "required": [
+                            "type",
+                            "boost"
+                          ]
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "const": "festival_day"
+                            },
+                            "boost": {
+                              "type": "number",
+                              "minimum": 1,
+                              "maximum": 3
+                            }
+                          },
+                          "required": [
+                            "type",
+                            "boost"
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  "promo": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "offerText": {
+                            "type": "string"
+                          },
+                          "codePrefix": {
+                            "type": "string",
+                            "pattern": "^[A-Z0-9]{2,8}$"
+                          },
+                          "validity": {
+                            "oneOf": [
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "mode": {
+                                    "type": "string",
+                                    "const": "boarding_close"
+                                  }
+                                },
+                                "required": [
+                                  "mode"
+                                ]
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "mode": {
+                                    "type": "string",
+                                    "const": "minutes"
+                                  },
+                                  "minutes": {
+                                    "type": "integer",
+                                    "minimum": 5,
+                                    "maximum": 1440
+                                  }
+                                },
+                                "required": [
+                                  "mode",
+                                  "minutes"
+                                ]
+                              }
+                            ]
+                          },
+                          "shareable": {
+                            "type": "boolean"
+                          },
+                          "outletId": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "inStock": {
+                            "type": "boolean"
+                          }
+                        },
+                        "required": [
+                          "offerText",
+                          "codePrefix",
+                          "validity",
+                          "shareable",
+                          "outletId",
+                          "inStock"
+                        ]
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "airlinePriority": {
+                    "type": "boolean"
+                  },
+                  "coFundedBy": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "competitorGroup": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "maxLength": 40
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "status": {
+                    "default": "draft",
+                    "type": "string",
+                    "enum": [
+                      "draft",
+                      "pending_review"
+                    ]
+                  }
+                },
+                "required": [
+                  "advertiserId",
+                  "name",
+                  "objective",
+                  "creativeIds",
+                  "segmentWeights",
+                  "hardFilters",
+                  "placement",
+                  "budget",
+                  "triggers",
+                  "promo",
+                  "airlinePriority",
+                  "coFundedBy"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "summary": "Create a campaign (draft)",
+        "tags": [
+          "Master data"
+        ]
+      }
+    },
+    "/api/campaigns/{id}": {
+      "get": {
+        "operationId": "MasterDataController_campaign",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "One campaign",
+        "tags": [
+          "Master data"
+        ]
+      },
+      "put": {
+        "operationId": "MasterDataController_updateCampaign",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "advertiserId": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "objective": {
+                    "type": "string",
+                    "enum": [
+                      "awareness",
+                      "footfall",
+                      "conversion",
+                      "goodwill"
+                    ]
+                  },
+                  "creativeIds": {
+                    "minItems": 1,
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "segmentWeights": {
+                    "type": "object",
+                    "propertyNames": {
+                      "type": "string"
+                    },
+                    "additionalProperties": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1
+                    }
+                  },
+                  "hardFilters": {
+                    "type": "object",
+                    "properties": {
+                      "market": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "enum": [
+                              "domestic",
+                              "international"
+                            ]
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "destinationRegions": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "destinations": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "minLength": 3,
+                          "maxLength": 3
+                        }
+                      },
+                      "minDwellMinutes": {
+                        "anyOf": [
+                          {
+                            "type": "number",
+                            "minimum": 0
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "minCrowd": {
+                        "anyOf": [
+                          {
+                            "type": "number",
+                            "minimum": 0
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "market",
+                      "destinationRegions",
+                      "destinations",
+                      "minDwellMinutes",
+                      "minCrowd"
+                    ]
+                  },
+                  "placement": {
+                    "type": "object",
+                    "properties": {
+                      "zoneIds": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "screenIds": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "gateIds": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "schedule": {
+                        "type": "object",
+                        "properties": {
+                          "start": {
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          "end": {
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          "daysOfWeek": {
+                            "type": "array",
+                            "items": {
+                              "type": "integer",
+                              "minimum": 1,
+                              "maximum": 7
+                            }
+                          },
+                          "hours": {
+                            "anyOf": [
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "from": {
+                                    "type": "integer",
+                                    "minimum": 0,
+                                    "maximum": 23
+                                  },
+                                  "to": {
+                                    "type": "integer",
+                                    "minimum": 1,
+                                    "maximum": 24
+                                  }
+                                },
+                                "required": [
+                                  "from",
+                                  "to"
+                                ]
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          }
+                        },
+                        "required": [
+                          "start",
+                          "end",
+                          "daysOfWeek",
+                          "hours"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "zoneIds",
+                      "screenIds",
+                      "gateIds",
+                      "schedule"
+                    ]
+                  },
+                  "budget": {
+                    "type": "object",
+                    "properties": {
+                      "total": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "dailyCap": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "cpm": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "frequencyCapPerScreenHour": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 9007199254740991
+                      }
+                    },
+                    "required": [
+                      "total",
+                      "dailyCap",
+                      "cpm",
+                      "frequencyCapPerScreenHour"
+                    ]
+                  },
+                  "triggers": {
+                    "type": "array",
+                    "items": {
+                      "oneOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "const": "delay_over"
+                            },
+                            "minutes": {
+                              "type": "integer",
+                              "minimum": 1,
+                              "maximum": 9007199254740991
+                            },
+                            "airlineIata": {
+                              "anyOf": [
+                                {
+                                  "type": "string",
+                                  "minLength": 2,
+                                  "maxLength": 2
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "destinations": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "minLength": 3,
+                                "maxLength": 3
+                              }
+                            },
+                            "boost": {
+                              "type": "number",
+                              "minimum": 1,
+                              "maximum": 3
+                            }
+                          },
+                          "required": [
+                            "type",
+                            "minutes",
+                            "airlineIata",
+                            "destinations",
+                            "boost"
+                          ]
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "const": "gate_change"
+                            },
+                            "boost": {
+                              "type": "number",
+                              "minimum": 1,
+                              "maximum": 3
+                            }
+                          },
+                          "required": [
+                            "type",
+                            "boost"
+                          ]
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "const": "boarding_starts"
+                            },
+                            "boost": {
+                              "type": "number",
+                              "minimum": 1,
+                              "maximum": 3
+                            }
+                          },
+                          "required": [
+                            "type",
+                            "boost"
+                          ]
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "const": "festival_day"
+                            },
+                            "boost": {
+                              "type": "number",
+                              "minimum": 1,
+                              "maximum": 3
+                            }
+                          },
+                          "required": [
+                            "type",
+                            "boost"
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  "promo": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "offerText": {
+                            "type": "string"
+                          },
+                          "codePrefix": {
+                            "type": "string",
+                            "pattern": "^[A-Z0-9]{2,8}$"
+                          },
+                          "validity": {
+                            "oneOf": [
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "mode": {
+                                    "type": "string",
+                                    "const": "boarding_close"
+                                  }
+                                },
+                                "required": [
+                                  "mode"
+                                ]
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "mode": {
+                                    "type": "string",
+                                    "const": "minutes"
+                                  },
+                                  "minutes": {
+                                    "type": "integer",
+                                    "minimum": 5,
+                                    "maximum": 1440
+                                  }
+                                },
+                                "required": [
+                                  "mode",
+                                  "minutes"
+                                ]
+                              }
+                            ]
+                          },
+                          "shareable": {
+                            "type": "boolean"
+                          },
+                          "outletId": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "inStock": {
+                            "type": "boolean"
+                          }
+                        },
+                        "required": [
+                          "offerText",
+                          "codePrefix",
+                          "validity",
+                          "shareable",
+                          "outletId",
+                          "inStock"
+                        ]
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "airlinePriority": {
+                    "type": "boolean"
+                  },
+                  "coFundedBy": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "competitorGroup": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "maxLength": 40
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "status": {
+                    "default": "draft",
+                    "type": "string",
+                    "enum": [
+                      "draft",
+                      "pending_review"
+                    ]
+                  }
+                },
+                "required": [
+                  "advertiserId",
+                  "name",
+                  "objective",
+                  "creativeIds",
+                  "segmentWeights",
+                  "hardFilters",
+                  "placement",
+                  "budget",
+                  "triggers",
+                  "promo",
+                  "airlinePriority",
+                  "coFundedBy"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Edit a campaign",
+        "tags": [
+          "Master data"
+        ]
+      },
+      "delete": {
+        "operationId": "MasterDataController_deleteCampaign",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Delete a draft campaign",
+        "tags": [
+          "Master data"
+        ]
+      }
+    },
+    "/api/campaigns/{id}/duplicate": {
+      "post": {
+        "operationId": "MasterDataController_duplicateCampaign",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "summary": "Duplicate a campaign (\"run again\")",
+        "tags": [
+          "Master data"
+        ]
+      }
+    },
+    "/api/campaigns/{id}/submit": {
+      "post": {
+        "operationId": "MasterDataController_submitCampaign",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Submit a campaign for review",
+        "tags": [
+          "Master data"
+        ]
+      }
+    },
+    "/api/campaigns/{id}/review": {
+      "post": {
+        "operationId": "MasterDataController_reviewCampaign",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "decision": {
+                    "type": "string",
+                    "enum": [
+                      "approve",
+                      "reject"
+                    ]
+                  },
+                  "reason": {
+                    "type": "string",
+                    "maxLength": 300
+                  },
+                  "brandSafety": {
+                    "type": "object",
+                    "properties": {
+                      "noRealBrandMarks": {
+                        "type": "boolean"
+                      },
+                      "claimsVerified": {
+                        "type": "boolean"
+                      },
+                      "ageAppropriate": {
+                        "type": "boolean"
+                      },
+                      "legibleAtDistance": {
+                        "type": "boolean"
+                      }
+                    },
+                    "required": [
+                      "noRealBrandMarks",
+                      "claimsVerified",
+                      "ageAppropriate",
+                      "legibleAtDistance"
+                    ]
+                  }
+                },
+                "required": [
+                  "decision"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Approve or reject a campaign",
+        "tags": [
+          "Master data"
+        ]
+      }
+    },
+    "/api/campaigns/{id}/pause": {
+      "post": {
+        "operationId": "MasterDataController_pauseCampaign",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Pause a campaign",
+        "tags": [
+          "Master data"
+        ]
+      }
+    },
+    "/api/campaigns/{id}/resume": {
+      "post": {
+        "operationId": "MasterDataController_resumeCampaign",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Resume a paused campaign",
+        "tags": [
+          "Master data"
+        ]
+      }
+    },
+    "/api/campaigns/{id}/stock": {
+      "put": {
+        "operationId": "MasterDataController_setStock",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "inStock": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "inStock"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Stock toggle: pause the promo while the item is out of stock",
+        "tags": [
+          "Master data"
+        ]
+      }
+    },
+    "/api/claims/{token}": {
+      "get": {
+        "operationId": "ClaimsController_open",
+        "parameters": [
+          {
+            "name": "token",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Open a claim link from a screen's QR code (counts as a scan)",
+        "tags": [
+          "Passenger claims"
+        ]
+      },
+      "post": {
+        "operationId": "ClaimsController_claim",
+        "parameters": [
+          {
+            "name": "token",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "summary": "Claim the offer: issues a personal code and records the redemption",
+        "tags": [
+          "Passenger claims"
+        ]
+      }
+    },
+    "/api/promo-codes/{code}/share": {
+      "post": {
+        "operationId": "ClaimsController_share",
+        "parameters": [
+          {
+            "name": "code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "summary": "Share a claimed code with family (once): returns a second claim link",
+        "tags": [
+          "Passenger claims"
+        ]
+      }
+    },
+    "/api/config/public": {
+      "get": {
+        "operationId": "ClaimsController_publicConfig",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Public settings for the web app",
+        "tags": [
+          "Passenger claims"
+        ]
+      }
+    },
+    "/api/advertisers/{id}/overview": {
+      "get": {
+        "operationId": "AnalyticsController_overview",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "An advertiser's live dashboard: today's totals, campaigns, hourly delivery, recent sales",
+        "tags": [
+          "Analytics"
+        ]
+      }
+    },
+    "/api/advertisers/{id}/flow": {
+      "get": {
+        "operationId": "AnalyticsController_flow",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "hours",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 2,
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 6
+            }
+          },
+          {
+            "name": "zoneId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "maxLength": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Passenger flow in an advertiser's zones for the next hours (summary for the next 60 min)",
+        "tags": [
+          "Analytics"
+        ]
+      }
+    },
+    "/api/advertisers/{id}/promo-codes": {
+      "get": {
+        "operationId": "AnalyticsController_promoCodes",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Promo codes issued for an advertiser's campaigns, with family shares and redemption state",
+        "tags": [
+          "Analytics"
+        ]
+      }
+    },
+    "/api/campaigns/{id}/performance": {
+      "get": {
+        "operationId": "AnalyticsController_performance",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Campaign performance: today, last 30 days with ROI, conversion by segment, suggested weights",
+        "tags": [
+          "Analytics"
+        ]
+      }
+    },
+    "/api/campaigns/{id}/best-slots": {
+      "get": {
+        "operationId": "AnalyticsController_bestSlots",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Best three slots tomorrow for a campaign (zone × hour by expected fit, crowd and price)",
+        "tags": [
+          "Analytics"
+        ]
+      }
+    },
+    "/api/campaigns/preview": {
+      "post": {
+        "operationId": "AnalyticsController_preview",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "advertiserId": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "objective": {
+                    "type": "string",
+                    "enum": [
+                      "awareness",
+                      "footfall",
+                      "conversion",
+                      "goodwill"
+                    ]
+                  },
+                  "creativeIds": {
+                    "minItems": 1,
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "segmentWeights": {
+                    "type": "object",
+                    "propertyNames": {
+                      "type": "string"
+                    },
+                    "additionalProperties": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1
+                    }
+                  },
+                  "hardFilters": {
+                    "type": "object",
+                    "properties": {
+                      "market": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "enum": [
+                              "domestic",
+                              "international"
+                            ]
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "destinationRegions": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "destinations": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "minLength": 3,
+                          "maxLength": 3
+                        }
+                      },
+                      "minDwellMinutes": {
+                        "anyOf": [
+                          {
+                            "type": "number",
+                            "minimum": 0
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "minCrowd": {
+                        "anyOf": [
+                          {
+                            "type": "number",
+                            "minimum": 0
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "market",
+                      "destinationRegions",
+                      "destinations",
+                      "minDwellMinutes",
+                      "minCrowd"
+                    ]
+                  },
+                  "placement": {
+                    "type": "object",
+                    "properties": {
+                      "zoneIds": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "screenIds": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "gateIds": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "schedule": {
+                        "type": "object",
+                        "properties": {
+                          "start": {
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          "end": {
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          "daysOfWeek": {
+                            "type": "array",
+                            "items": {
+                              "type": "integer",
+                              "minimum": 1,
+                              "maximum": 7
+                            }
+                          },
+                          "hours": {
+                            "anyOf": [
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "from": {
+                                    "type": "integer",
+                                    "minimum": 0,
+                                    "maximum": 23
+                                  },
+                                  "to": {
+                                    "type": "integer",
+                                    "minimum": 1,
+                                    "maximum": 24
+                                  }
+                                },
+                                "required": [
+                                  "from",
+                                  "to"
+                                ]
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          }
+                        },
+                        "required": [
+                          "start",
+                          "end",
+                          "daysOfWeek",
+                          "hours"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "zoneIds",
+                      "screenIds",
+                      "gateIds",
+                      "schedule"
+                    ]
+                  },
+                  "budget": {
+                    "type": "object",
+                    "properties": {
+                      "total": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "dailyCap": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "cpm": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "frequencyCapPerScreenHour": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 9007199254740991
+                      }
+                    },
+                    "required": [
+                      "total",
+                      "dailyCap",
+                      "cpm",
+                      "frequencyCapPerScreenHour"
+                    ]
+                  },
+                  "triggers": {
+                    "type": "array",
+                    "items": {
+                      "oneOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "const": "delay_over"
+                            },
+                            "minutes": {
+                              "type": "integer",
+                              "minimum": 1,
+                              "maximum": 9007199254740991
+                            },
+                            "airlineIata": {
+                              "anyOf": [
+                                {
+                                  "type": "string",
+                                  "minLength": 2,
+                                  "maxLength": 2
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "destinations": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "minLength": 3,
+                                "maxLength": 3
+                              }
+                            },
+                            "boost": {
+                              "type": "number",
+                              "minimum": 1,
+                              "maximum": 3
+                            }
+                          },
+                          "required": [
+                            "type",
+                            "minutes",
+                            "airlineIata",
+                            "destinations",
+                            "boost"
+                          ]
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "const": "gate_change"
+                            },
+                            "boost": {
+                              "type": "number",
+                              "minimum": 1,
+                              "maximum": 3
+                            }
+                          },
+                          "required": [
+                            "type",
+                            "boost"
+                          ]
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "const": "boarding_starts"
+                            },
+                            "boost": {
+                              "type": "number",
+                              "minimum": 1,
+                              "maximum": 3
+                            }
+                          },
+                          "required": [
+                            "type",
+                            "boost"
+                          ]
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "const": "festival_day"
+                            },
+                            "boost": {
+                              "type": "number",
+                              "minimum": 1,
+                              "maximum": 3
+                            }
+                          },
+                          "required": [
+                            "type",
+                            "boost"
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  "promo": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "offerText": {
+                            "type": "string"
+                          },
+                          "codePrefix": {
+                            "type": "string",
+                            "pattern": "^[A-Z0-9]{2,8}$"
+                          },
+                          "validity": {
+                            "oneOf": [
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "mode": {
+                                    "type": "string",
+                                    "const": "boarding_close"
+                                  }
+                                },
+                                "required": [
+                                  "mode"
+                                ]
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "mode": {
+                                    "type": "string",
+                                    "const": "minutes"
+                                  },
+                                  "minutes": {
+                                    "type": "integer",
+                                    "minimum": 5,
+                                    "maximum": 1440
+                                  }
+                                },
+                                "required": [
+                                  "mode",
+                                  "minutes"
+                                ]
+                              }
+                            ]
+                          },
+                          "shareable": {
+                            "type": "boolean"
+                          },
+                          "outletId": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "inStock": {
+                            "type": "boolean"
+                          }
+                        },
+                        "required": [
+                          "offerText",
+                          "codePrefix",
+                          "validity",
+                          "shareable",
+                          "outletId",
+                          "inStock"
+                        ]
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "airlinePriority": {
+                    "type": "boolean"
+                  },
+                  "coFundedBy": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "competitorGroup": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "maxLength": 40
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "advertiserId",
+                  "name",
+                  "objective",
+                  "creativeIds",
+                  "segmentWeights",
+                  "hardFilters",
+                  "placement",
+                  "budget",
+                  "triggers",
+                  "promo",
+                  "airlinePriority",
+                  "coFundedBy"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Live audience preview of a campaign being built: how it would score on its screens now",
+        "tags": [
+          "Analytics"
+        ]
+      }
+    },
+    "/api/airlines/{iata}/overview": {
+      "get": {
+        "operationId": "AnalyticsController_airline",
+        "parameters": [
+          {
+            "name": "iata",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "An airline's day: flights, passenger profile, what plays at its gates, goodwill, partner offers",
+        "tags": [
+          "Analytics"
+        ]
+      }
+    },
+    "/api/inventory": {
+      "get": {
+        "operationId": "AnalyticsController_inventory",
+        "parameters": [
+          {
+            "name": "zoneId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "maxLength": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Inventory calendar: screen × hour with predicted crowd, bookings, status and price",
+        "tags": [
+          "Analytics"
+        ]
+      }
+    },
+    "/api/inventory/forecast": {
+      "get": {
+        "operationId": "AnalyticsController_forecast",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Seven-day outlook: footfall, expected occupancy and average suggested price per day",
+        "tags": [
+          "Analytics"
+        ]
+      }
+    },
+    "/api/delivery/advertisers": {
+      "get": {
+        "operationId": "AnalyticsController_delivery",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Delivery per advertiser today against its pacing target (under-delivery flagged)",
+        "tags": [
+          "Analytics"
+        ]
+      }
+    },
+    "/api/insights/segments": {
+      "get": {
+        "operationId": "AnalyticsController_segments",
+        "parameters": [
+          {
+            "name": "zoneId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "maxLength": 20
+            }
+          },
+          {
+            "name": "from",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 5,
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 23
+            }
+          },
+          {
+            "name": "to",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 23,
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 23
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Segment shares by hour for a zone (or all airside zones): the segment heat map",
+        "tags": [
+          "Analytics"
+        ]
+      }
+    },
+    "/api/creatives/assist": {
+      "post": {
+        "operationId": "AssistantController_assist",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "advertiserId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 40
+                  },
+                  "brief": {
+                    "type": "string",
+                    "minLength": 3,
+                    "maxLength": 400
+                  },
+                  "tone": {
+                    "default": "warm",
+                    "type": "string",
+                    "enum": [
+                      "warm",
+                      "premium",
+                      "playful",
+                      "urgent"
+                    ]
+                  }
+                },
+                "required": [
+                  "advertiserId",
+                  "brief"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "GenAI creative assistant: three creative variants (English and Arabic) from a brief, with brand-safety checks",
+        "tags": [
+          "Creative assistant"
+        ]
+      }
+    },
+    "/api/stream": {
+      "get": {
+        "operationId": "StreamController_stream",
+        "parameters": [
+          {
+            "name": "topics",
+            "required": false,
+            "in": "query",
+            "description": "Comma-separated topics (default: all)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Server-Sent Events stream of live updates (filter with `topics`)",
+        "tags": [
+          "Live updates"
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "Airport Retail Media Platform API",
+    "description": "REST API of the airport retail media platform: simulation control, live operations, the ad decision engine (with its evidence trail), master data, and the passenger claim flow. Live updates are streamed as Server-Sent Events from `GET /api/stream?topics=…` (topics: clock, flight, flights_reloaded, queue, screen, incident, feeds, sim, decisions, delivery, presence, model, catalog, claims).",
+    "version": "1.0.0",
+    "contact": {}
+  },
+  "tags": [],
+  "servers": [],
+  "components": {
+    "schemas": {}
+  }
+}

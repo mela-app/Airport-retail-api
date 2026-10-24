@@ -1,0 +1,27 @@
+node_modules/
+dist/
+build/
+coverage/
+*.tsbuildinfo
+.env
+.env.*
+!.env.example
+
+# generated data and local runtime state
+**/data/generated/
+.pglite/
+*.log
+
+# scanner reports (regenerate with scripts/scan.sh)
+trivy-results.json
+opengrep-results.json
+
+# internal working notes and the original challenge download
+planning/
+Playground.zip
+
+.DS_Store
+.vscode/
+.idea/
+.scan/
+.tools/

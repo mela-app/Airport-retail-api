@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ILLUSTRATIVE ONLY: hand-written to show the shape of an IATA AIDX flight-leg update,
+     as an AODB would publish/consume it. Values match row XH960 (arrival) in
+     MQI_aodb_flights_2026-10-14_SYNTHETIC.csv. All airport, airline and aircraft identifiers
+     are fictional. Validate against the official IATA AIDX XSD before using it for
+     integration testing. -->
+<IATA_AIDX_FlightLegNotifRQ xmlns="http://www.iata.org/IATA/2007/00"
+    Version="16.1" Target="Test" TimeStamp="2026-10-14T00:19:02Z"
+    TransactionIdentifier="MQI-AODB-000184533" SequenceNmbr="184533">
+  <Originator CompanyShortName="MQI" TravelSector="5" Code="MQI" CodeContext="3"/>
+  <DeliveringSystem CompanyShortName="AODB"/>
+  <FlightLeg>
+    <LegIdentifier>
+      <Airline CodeContext="3">XH</Airline>
+      <FlightNumber>960</FlightNumber>
+      <DepartureAirport CodeContext="3">ZHQ</DepartureAirport>
+      <ArrivalAirport CodeContext="3">MQI</ArrivalAirport>
+      <OriginDate>2026-10-13</OriginDate>
+    </LegIdentifier>
+    <LegData InternalDomesticIndicator="false">
+      <PublicStatus>ARR</PublicStatus>
+      <OperationalStatus>ONB</OperationalStatus>
+      <ServiceType>J</ServiceType>
+      <CodeShareInfo>
+        <Airline>XD</Airline>
+        <FlightNumber>6214</FlightNumber>
+      </CodeShareInfo>
+      <AirportResources Usage="Actual">
+        <Resource DepartureOrArrival="Arrival">
+          <AircraftParkingPosition>C38</AircraftParkingPosition>
+          <BaggageClaimUnit>3</BaggageClaimUnit>
+          <AircraftTerminal>T2</AircraftTerminal>
+        </Resource>
+      </AirportResources>
+      <OperationTime OperationQualifier="ONB" CodeContext="9750" TimeType="SCT">2026-10-14T00:15:00Z</OperationTime>
+      <OperationTime OperationQualifier="TDN" CodeContext="9750" TimeType="ACT">2026-10-14T00:10:00Z</OperationTime>
+      <OperationTime OperationQualifier="ONB" CodeContext="9750" TimeType="ACT">2026-10-14T00:18:00Z</OperationTime>
+      <AircraftInfo>
+        <AircraftType>359</AircraftType>
+        <Registration>QH-BC</Registration>
+        <TailNumber>QH-BC</TailNumber>
+      </AircraftInfo>
+      <CabinClass Class="J"><SeatCapacity>30</SeatCapacity><PaxCount>27</PaxCount></CabinClass>
+      <CabinClass Class="Y"><SeatCapacity>253</SeatCapacity><PaxCount>197</PaxCount></CabinClass>
+    </LegData>
+  </FlightLeg>
+</IATA_AIDX_FlightLegNotifRQ>

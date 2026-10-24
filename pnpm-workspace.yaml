@@ -1,0 +1,17 @@
+packages:
+  - apps/*
+  - packages/*
+
+# pnpm 11 blocks dependency install scripts unless allowed. esbuild's only checks its platform binary.
+allowBuilds:
+  # @scarf/scarf (pulled in by swagger-ui-dist) only sends install telemetry: blocked.
+  '@scarf/scarf': false
+  esbuild: true
+
+# Supply-chain hardening.
+# Only install package versions that have been public for at least 7 days.
+minimumReleaseAge: 10080
+# Transitive dependencies may only come from the registry (no git or tarball URLs).
+blockExoticSubdeps: true
+# Refuse updates that downgrade a package's publishing trust (e.g. provenance to none).
+trustPolicy: no-downgrade

@@ -1,0 +1,73 @@
+# Local run: `docker compose up` → API on http://localhost:3000 (docs at /api/docs)
+#
+# - api: REST + SSE API, simulation and decision engine
+# - db:  PostgreSQL 17 on an internal network (not published)
+#
+# The frontend (separate repository) joins the `arm-edge` network and forwards /api to `api:8080`; start this
+# stack first. Production uses deploy/compose.yaml (the published image, no ports on the host).
+name: arm-api
+
+services:
+  api:
+    build: .
+    image: arm-api:local
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgres://arm:${POSTGRES_PASSWORD:-arm-local-only}@db:5432/arm
+      PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:-}
+      SIM_SPEED: ${SIM_SPEED:-1}
+      AI_PROVIDER: ${AI_PROVIDER:-mock}
+      AI_API_URL: ${AI_API_URL:-}
+      AI_API_KEY: ${AI_API_KEY:-}
+      AI_MODEL: ${AI_MODEL:-}
+      TRUST_PROXY: uniquelocal
+    ports:
+      - target: 8080
+        published: '3000'
+        host_ip: ${BIND_ADDRESS:-127.0.0.1}
+    volumes:
+      - app-data:/data
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - edge
+      - internal
+    restart: unless-stopped
+
+  db:
+    image: postgres:17.11-alpine3.24@sha256:eee6c6e1b0894fa4fe0075eb054af9fd1cf39a35321c2d4110626cfe506411fb
+    environment:
+      POSTGRES_USER: arm
+      POSTGRES_DB: arm
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-arm-local-only}
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    read_only: true
+    tmpfs:
+      - /tmp
+      - /var/run/postgresql
+    security_opt:
+      - no-new-privileges:true
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U arm -d arm']
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    networks:
+      - internal
+    restart: unless-stopped
+
+volumes:
+  app-data:
+  db-data:
+
+networks:
+  edge:
+    name: arm-edge
+  internal:
+    internal: true

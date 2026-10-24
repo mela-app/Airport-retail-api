@@ -1,0 +1,15 @@
+**/node_modules
+**/dist
+**/.pglite
+**/data/generated
+**/*.log
+.git
+.github
+.scan
+planning
+docs
+Playground.zip
+samples
+*.md
+.env
+.env.*

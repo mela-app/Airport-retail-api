@@ -1,0 +1,66 @@
+# Production (the VPS): the published image, started by the deploy job of .github/workflows/ci.yml.
+#   API_IMAGE          ghcr.io/<owner>/<repo>@sha256:...   (set by the deploy job)
+#   POSTGRES_PASSWORD  required, kept in /opt/arm/api/.env on the server
+#   PUBLIC_BASE_URL    the playground's public address (QR claim links), e.g. https://arm.example.com
+# No port is published: the frontend's Caddy reaches the API as `api:8080` on the `arm-edge` network.
+name: arm-api
+
+services:
+  api:
+    image: ${API_IMAGE:?set API_IMAGE}
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgres://arm:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}@db:5432/arm
+      PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:-}
+      SIM_SPEED: ${SIM_SPEED:-1}
+      AI_PROVIDER: ${AI_PROVIDER:-mock}
+      AI_API_URL: ${AI_API_URL:-}
+      AI_API_KEY: ${AI_API_KEY:-}
+      AI_MODEL: ${AI_MODEL:-}
+      TRUST_PROXY: uniquelocal
+    volumes:
+      - app-data:/data
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - edge
+      - internal
+    restart: unless-stopped
+
+  db:
+    image: postgres:17.11-alpine3.24@sha256:eee6c6e1b0894fa4fe0075eb054af9fd1cf39a35321c2d4110626cfe506411fb
+    environment:
+      POSTGRES_USER: arm
+      POSTGRES_DB: arm
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    read_only: true
+    tmpfs:
+      - /tmp
+      - /var/run/postgresql
+    security_opt:
+      - no-new-privileges:true
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U arm -d arm']
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    networks:
+      - internal
+    restart: unless-stopped
+
+volumes:
+  app-data:
+  db-data:
+
+networks:
+  edge:
+    name: arm-edge
+  internal:
+    internal: true
